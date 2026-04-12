@@ -1,121 +1,132 @@
+import { Plus, SquarePen, X } from 'lucide-react'
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+	const [input, setInput] = useState('')
+	const [todos, setTodos] = useState([])
+	const [error, setError] = useState('')
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+	const handleKeyDown = event => {
+		if (event.key === 'Enter') {
+			handleAddTodo()
+		}
+	}
 
-      <div className="ticks"></div>
+	const handleAddTodo = () => {
+		if (input.trim() !== '') {
+			const todoObj = {
+				id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+				text: input,
+				isCompleted: false
+			}
+			setTodos([...todos, todoObj])
+			setInput('')
+			setError('')
+		} else {
+			setError(
+				'Oops! You forgot to write the task. What would you like to add?'
+			)
+		}
+	}
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+	const todoDel = todosId => {
+		setTodos(todos.filter(todo => todo.id !== todosId))
+	}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+	const handleToggleCheck = id => {
+		setTodos(
+			todos.map(todo =>
+				todo.id === id ? { ...todo, isCompleted: !todo.isCompleted } : todo
+			)
+		)
+	}
+
+	return (
+		<main className="container">
+			<h1 className="main__title">
+				Arionel <span>Todo</span>
+			</h1>
+
+			<section className="todo-app">
+				<div className="toolbar">
+					<input
+						type="text"
+						className="add__input"
+						placeholder="Add new task"
+						value={input}
+						onChange={e => setInput(e.target.value)}
+						onKeyDown={handleKeyDown}
+					/>
+					<button
+						className="add__btn"
+						type="button"
+						aria-label="Add task"
+						onClick={handleAddTodo}
+					>
+						<Plus />
+					</button>
+				</div>
+				<div className="error">
+					{error && <p className="error-text">{error}</p>}
+				</div>
+				<div className="controls">
+					<select
+						name="filter"
+						className="filter__todo"
+					>
+						<option value="all">All</option>
+						<option value="active">Active</option>
+						<option value="completed">Completed</option>
+					</select>
+
+					<button
+						className="clear-btn"
+						type="button"
+						// onClick={clearCompleted}
+					>
+						Clear Completed
+					</button>
+				</div>
+
+				<div className="list">
+					<ul className="todo-list">
+						{todos.map(todo => (
+							<li
+								className="todo-item"
+								key={todo.id}
+							>
+								<button className="todo-change">
+									<SquarePen />
+								</button>
+								<div className="todo-item-box">
+									<input
+										type="checkbox"
+										className="item-checkbox"
+										onChange={() => {
+											handleToggleCheck(todo.id)
+										}}
+									/>
+									<p className="todo__item-text">{todo.text}</p>
+								</div>
+								<button
+									className="todo-del"
+									onClick={() => todoDel(todo.id)}
+								>
+									<X />
+								</button>
+							</li>
+						))}
+					</ul>
+				</div>
+				<p className="todos-number">
+					Task remaining:{' '}
+					<span className="todos-number-span">
+						{todos.filter(todo => !todo.isCompleted).length}
+					</span>
+				</p>
+			</section>
+		</main>
+	)
 }
 
 export default App
