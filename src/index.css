@@ -228,7 +228,7 @@ button {
 }
 
 .todo__item-text.completed {
-	color: var(--text-main);
+	color: var(--text-muted);
 	text-decoration: line-through;
 }
 

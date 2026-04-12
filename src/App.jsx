@@ -1,10 +1,14 @@
 import { Plus, SquarePen, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 function App() {
 	const [input, setInput] = useState('')
-	const [todos, setTodos] = useState([])
+	const [todos, setTodos] = useState(() => {
+		const savedTodos = localStorage.getItem('todos')
+		return savedTodos ? JSON.parse(savedTodos) : []
+	})
 	const [error, setError] = useState('')
+	const [select, setSelect] = useState('all')
 
 	const handleKeyDown = event => {
 		if (event.key === 'Enter') {
@@ -16,7 +20,7 @@ function App() {
 		if (input.trim() !== '') {
 			const todoObj = {
 				id: Date.now().toString(36) + Math.random().toString(36).slice(2),
-				text: input,
+				text: input.trim(),
 				isCompleted: false
 			}
 			setTodos([...todos, todoObj])
@@ -40,6 +44,28 @@ function App() {
 			)
 		)
 	}
+
+	const clearAllCompleted = () => {
+		setTodos(todos.filter(todo => !todo.isCompleted))
+	}
+
+	const handleSelect = event => {
+		setSelect(event.target.value)
+	}
+
+	let visibleTodos = todos
+
+	if (select === 'active') {
+		visibleTodos = visibleTodos.filter(todo => !todo.isCompleted)
+	}
+
+	if (select === 'completed') {
+		visibleTodos = visibleTodos.filter(todo => todo.isCompleted)
+	}
+
+	useEffect(() => {
+		localStorage.setItem('todos', JSON.stringify(todos))
+	}, [todos])
 
 	return (
 		<main className="container">
@@ -73,6 +99,8 @@ function App() {
 					<select
 						name="filter"
 						className="filter__todo"
+						value={select}
+						onChange={handleSelect}
 					>
 						<option value="all">All</option>
 						<option value="active">Active</option>
@@ -82,7 +110,7 @@ function App() {
 					<button
 						className="clear-btn"
 						type="button"
-						// onClick={clearCompleted}
+						onClick={clearAllCompleted}
 					>
 						Clear Completed
 					</button>
@@ -90,7 +118,7 @@ function App() {
 
 				<div className="list">
 					<ul className="todo-list">
-						{todos.map(todo => (
+						{visibleTodos.map(todo => (
 							<li
 								className="todo-item"
 								key={todo.id}
@@ -102,11 +130,16 @@ function App() {
 									<input
 										type="checkbox"
 										className="item-checkbox"
+										checked={todo.isCompleted}
 										onChange={() => {
 											handleToggleCheck(todo.id)
 										}}
 									/>
-									<p className="todo__item-text">{todo.text}</p>
+									<p
+										className={`todo__item-text ${todo.isCompleted ? 'completed' : ''}`}
+									>
+										{todo.text}
+									</p>
 								</div>
 								<button
 									className="todo-del"
