@@ -30,8 +30,8 @@ project is a React remake of my original vanilla JavaScript Todo application.
 ## 📦 Installation
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME.git
-cd YOUR_REPOSITORY_NAME
+git clone https://github.com/arionel0726-dev/Todo-React.git
+cd Todo-React
 npm install
 npm run dev
 ```
