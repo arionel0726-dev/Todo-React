@@ -25,7 +25,7 @@ project is a React remake of my original vanilla JavaScript Todo application.
 
 ## 🌐 Live Demo
 
-[live demo]()
+[live demo](https://todo-react-gray-sigma.vercel.app/)
 
 ## 📦 Installation
 
