@@ -1,121 +1,103 @@
-import { Plus, SquarePen, X } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { TodoItem } from './components/TodoItem'
 
 function App() {
-	const [input, setInput] = useState('')
-	const [todos, setTodos] = useState(() => {
-		const savedTodos = localStorage.getItem('todos')
-		return savedTodos ? JSON.parse(savedTodos) : []
-	})
-	const [error, setError] = useState('')
-	const [select, setSelect] = useState('all')
-	const [EditingId, setEditingId] = useState(null)
-	const [text, setText] = useState('')
+	// Состояние поля ввода новой задачи
+	const [inputValue, setInputValue] = useState('')
 
-	const handleKeyDown = event => {
+	// Список задач. При первом рендере пробуем загрузить из localStorage
+	const [todos, setTodos] = useState(() => {
+		try {
+			const savedTodos = localStorage.getItem('todos')
+			return savedTodos ? JSON.parse(savedTodos) : []
+		} catch (error) {
+			return []
+		}
+	})
+
+	// Текст ошибки под инпутом
+	const [errorMessage, setErrorMessage] = useState('')
+
+	// Текущее состояние фильтра: all / active / completed
+	const [filter, setFilter] = useState('all')
+
+	// Добавление задачи по Enter
+	const handleInputKeyDown = event => {
 		if (event.key === 'Enter') {
 			handleAddTodo()
 		}
 	}
 
-	const handleKeyDownEditing = event => {
-		if (event.key === 'Escape') {
-			setEditingId(null)
-		} else if (event.key === 'Enter') {
-			saveEdit(EditingId)
-		}
-	}
-
+	// Добавление новой задачи
 	const handleAddTodo = () => {
-		if (input.trim() !== '') {
-			const todoObj = {
-				id: Date.now().toString(36) + Math.random().toString(36).slice(2),
-				text: input.trim(),
-				isCompleted: false
-			}
-			setTodos([...todos, todoObj])
-			setInput('')
-			setError('')
-		} else {
-			setError(
+		const trimmedValue = inputValue.trim()
+
+		if (trimmedValue === '') {
+			setErrorMessage(
 				'Oops! You forgot to write the task. What would you like to add?'
 			)
+			return
 		}
+
+		const newTodo = {
+			id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+			text: trimmedValue,
+			isCompleted: false
+		}
+
+		setTodos(prevTodos => [...prevTodos, newTodo])
+		setInputValue('')
+		setErrorMessage('')
 	}
 
-	const todoDel = todosId => {
-		setTodos(todos.filter(todo => todo.id !== todosId))
+	// Удаление всех выполненных задач
+	const handleClearCompleted = () => {
+		setTodos(prevTodos => prevTodos.filter(todo => !todo.isCompleted))
 	}
 
-	const handleToggleCheck = id => {
-		setTodos(
-			todos.map(todo =>
-				todo.id === id ? { ...todo, isCompleted: !todo.isCompleted } : todo
-			)
-		)
+	// Смена фильтра
+	const handleFilterChange = event => {
+		setFilter(event.target.value)
 	}
 
-	const clearAllCompleted = () => {
-		setTodos(todos.filter(todo => !todo.isCompleted))
-	}
-
-	const handleSelect = event => {
-		setSelect(event.target.value)
-	}
-
-	const startEdit = todo => {
-		setEditingId(todo.id)
-		setText(todo.text)
-	}
-
-	const saveEdit = id => {
-		if (text.trim() === '') return
-		setTodos(
-			todos.map(todo => {
-				if (todo.id === id) {
-					return {
-						...todo,
-						text: text
-					}
-				}
-				return todo
-			})
-		)
-		setEditingId(null)
-	}
-
+	// Отфильтрованный список задач для отображения
 	let visibleTodos = todos
 
-	if (select === 'active') {
-		visibleTodos = visibleTodos.filter(todo => !todo.isCompleted)
+	if (filter === 'active') {
+		visibleTodos = todos.filter(todo => !todo.isCompleted)
+	} else if (filter === 'completed') {
+		visibleTodos = todos.filter(todo => todo.isCompleted)
 	}
 
-	if (select === 'completed') {
-		visibleTodos = visibleTodos.filter(todo => todo.isCompleted)
-	}
-
+	// Сохраняем задачи в localStorage при каждом изменении
 	useEffect(() => {
 		localStorage.setItem('todos', JSON.stringify(todos))
 	}, [todos])
 
+	// Количество невыполненных задач
+	const remainingTodosCount = todos.filter(todo => !todo.isCompleted).length
+
 	return (
-		<main className="container">
-			<h1 className="main__title">
+		<main className="app">
+			<h1 className="app__title">
 				Arionel <span>Todo</span>
 			</h1>
 
-			<section className="todo-app">
-				<div className="toolbar">
+			<section className="todo">
+				{/* Верхняя панель: поле ввода и кнопка добавления */}
+				<div className="todo__toolbar">
 					<input
 						type="text"
-						className="add__input"
+						className="todo__input"
 						placeholder="Add new task"
-						value={input}
-						onChange={e => setInput(e.target.value)}
-						onKeyDown={handleKeyDown}
+						value={inputValue}
+						onChange={event => setInputValue(event.target.value)}
+						onKeyDown={handleInputKeyDown}
 					/>
+
 					<button
-						className="add__btn"
+						className="todo__add-button"
 						type="button"
 						aria-label="Add task"
 						onClick={handleAddTodo}
@@ -123,15 +105,19 @@ function App() {
 						<Plus />
 					</button>
 				</div>
-				<div className="error">
-					{error && <p className="error-text">{error}</p>}
+
+				{/* Блок ошибки */}
+				<div className="todo__error">
+					{errorMessage && <p className="todo__error-text">{errorMessage}</p>}
 				</div>
-				<div className="controls">
+
+				{/* Управление фильтром и очисткой выполненных */}
+				<div className="todo__controls">
 					<select
 						name="filter"
-						className="filter__todo"
-						value={select}
-						onChange={handleSelect}
+						className="todo__filter"
+						value={filter}
+						onChange={handleFilterChange}
 					>
 						<option value="all">All</option>
 						<option value="active">Active</option>
@@ -139,73 +125,32 @@ function App() {
 					</select>
 
 					<button
-						className="clear-btn"
+						className="todo__clear-button"
 						type="button"
-						onClick={clearAllCompleted}
+						onClick={handleClearCompleted}
 					>
-						Clear Completed
+						Clear completed
 					</button>
 				</div>
 
-				<div className="list">
-					<ul className="todo-list">
+				{/* Список задач */}
+				<div className="todo__list-wrapper">
+					<ul className="todo__list">
 						{visibleTodos.map(todo => (
-							<li
-								className="todo-item"
+							<TodoItem
 								key={todo.id}
-							>
-								<button
-									className="todo-change"
-									onClick={() => startEdit(todo)}
-								>
-									<SquarePen />
-								</button>
-								<div className="todo-item-box">
-									<input
-										type="checkbox"
-										className="item-checkbox"
-										checked={todo.isCompleted}
-										onChange={() => {
-											handleToggleCheck(todo.id)
-										}}
-									/>
-									{EditingId === todo.id ? (
-										<input
-											type="text"
-											value={text}
-											onChange={e => setText(e.target.value)}
-											onBlur={() =>
-												todo.text === text
-													? setEditingId(null)
-													: saveEdit(todo.id)
-											}
-											onKeyDown={handleKeyDownEditing}
-											autoFocus
-											className="change"
-										/>
-									) : (
-										<p
-											className={`todo__item-text ${todo.isCompleted ? 'completed' : ''}`}
-										>
-											{todo.text}
-										</p>
-									)}
-								</div>
-								<button
-									className="todo-del"
-									onClick={() => todoDel(todo.id)}
-								>
-									<X />
-								</button>
-							</li>
+								todo={todo}
+								todos={todos}
+								setTodos={setTodos}
+							/>
 						))}
 					</ul>
 				</div>
-				<p className="todos-number">
-					Task remaining:{' '}
-					<span className="todos-number-span">
-						{todos.filter(todo => !todo.isCompleted).length}
-					</span>
+
+				{/* Счетчик оставшихся задач */}
+				<p className="todo__counter">
+					Tasks remaining:{' '}
+					<span className="todo__counter-value">{remainingTodosCount}</span>
 				</p>
 			</section>
 		</main>
