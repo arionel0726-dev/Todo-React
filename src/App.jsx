@@ -9,10 +9,20 @@ function App() {
 	})
 	const [error, setError] = useState('')
 	const [select, setSelect] = useState('all')
+	const [EditingId, setEditingId] = useState(null)
+	const [text, setText] = useState('')
 
 	const handleKeyDown = event => {
 		if (event.key === 'Enter') {
 			handleAddTodo()
+		}
+	}
+
+	const handleKeyDownEditing = event => {
+		if (event.key === 'Escape') {
+			setEditingId(null)
+		} else if (event.key === 'Enter') {
+			saveEdit(EditingId)
 		}
 	}
 
@@ -51,6 +61,27 @@ function App() {
 
 	const handleSelect = event => {
 		setSelect(event.target.value)
+	}
+
+	const startEdit = todo => {
+		setEditingId(todo.id)
+		setText(todo.text)
+	}
+
+	const saveEdit = id => {
+		if (text.trim() === '') return
+		setTodos(
+			todos.map(todo => {
+				if (todo.id === id) {
+					return {
+						...todo,
+						text: text
+					}
+				}
+				return todo
+			})
+		)
+		setEditingId(null)
 	}
 
 	let visibleTodos = todos
@@ -123,7 +154,10 @@ function App() {
 								className="todo-item"
 								key={todo.id}
 							>
-								<button className="todo-change">
+								<button
+									className="todo-change"
+									onClick={() => startEdit(todo)}
+								>
 									<SquarePen />
 								</button>
 								<div className="todo-item-box">
@@ -135,11 +169,27 @@ function App() {
 											handleToggleCheck(todo.id)
 										}}
 									/>
-									<p
-										className={`todo__item-text ${todo.isCompleted ? 'completed' : ''}`}
-									>
-										{todo.text}
-									</p>
+									{EditingId === todo.id ? (
+										<input
+											type="text"
+											value={text}
+											onChange={e => setText(e.target.value)}
+											onBlur={() =>
+												todo.text === text
+													? setEditingId(null)
+													: saveEdit(todo.id)
+											}
+											onKeyDown={handleKeyDownEditing}
+											autoFocus
+											className="change"
+										/>
+									) : (
+										<p
+											className={`todo__item-text ${todo.isCompleted ? 'completed' : ''}`}
+										>
+											{todo.text}
+										</p>
+									)}
 								</div>
 								<button
 									className="todo-del"
