@@ -1,20 +1,25 @@
 # Todo React app
 
-A simple and interactive React Todo application with React and Javascript
-
-The original application writed in vanilla Javascript you can find
+A clean and interactive Todo app built with React, JavaScript, and Vite. This
+project is a React remake of my original vanilla JavaScript Todo application.
 [here](https://github.com/arionel0726-dev/Todo)
 
 ## 📜 Features
 
-- add
+- Add new todos
+- Edit existing todos
+- Delete todos
+- Mark todos as completed
+- Filter todos by status
+- Clear completed todos
+- Save todos in localStorage
 
 ## 🛠️ Technologies
 
 - React
-- Javascript
+- JavaScript
 - Vite
-- TailwindsCss
+- CSS
 - HTML
 - Lucide Icons
 
@@ -25,6 +30,8 @@ The original application writed in vanilla Javascript you can find
 ## 📦 Installation
 
 ```bash
-blabla
-blabla
+git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME.git
+cd YOUR_REPOSITORY_NAME
+npm install
+npm run dev
 ```

@@ -1,7 +1,7 @@
 import { SquarePen, X } from 'lucide-react'
 import { useState } from 'react'
 
-export function TodoItem({ todo, todos, setTodos }) {
+export function TodoItem({ todo, setTodos }) {
 	// Какой todo сейчас редактируется
 	const [editingTodoId, setEditingTodoId] = useState(null)
 

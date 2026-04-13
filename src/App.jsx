@@ -140,7 +140,6 @@ function App() {
 							<TodoItem
 								key={todo.id}
 								todo={todo}
-								todos={todos}
 								setTodos={setTodos}
 							/>
 						))}
